@@ -1,20 +1,30 @@
-# **M. tuberculosis** variant calling project.
+# Variant calling for * *M. tuberculosis* * transmission inference.
 
-Here we include scripts to create the plots in our paper, Variant calling approaches alter transmission inferences in **Mycobacterium tuberculosis** genomic epidemiology studies, available [here] (https://www.nytimes.com/). 
+Here we include scripts to create the plots in our paper, Variant calling approaches alter transmission inferences in * *Mycobacterium tuberculosis* * genomic epidemiology studies, available [here] (https://www.nytimes.com/). 
 
 - Add short abstract here. 
 
 ## Scripts included. 
 
-- plot_roetzer_variants.R includes the code for figures 1 and 2. The VCF, FASTA, and tree files associated with each pipeline are available [here] (add URL). 
-- plot_outbreak_performance.R includes the code for figures 3-6. The data for those figures are available here [here] (https://www.nytimes.com/).**update URL.
-- map_reads.sh Maps reads.
-- call_variants_gatk.sh Calls variants with GATK. 
-- call_variants_samtools.sh Calls variants with Samtools. 
-- call_variants_deepvariant.sh Calls variants with DeepVariant. 
-- filter_variants.sh Filters VCF files. Haploidifies DeepVariant diploid VCF files. 
-- run_happy.sh Tests performance of a pipeline in recovering true variants (requires a query VCF, truth VCF, and reference fasta).
-- haploidify.py
---Converts diploid single-sample VCF file to haplid VCF file using allele depth information. 
+- plot_roetzer_variants.R 
+  - includes the code for figures 1 and 2. The VCF, FASTA, and tree files associated with each pipeline are available [here] (add URL). 
+- plot_outbreak_performance.R 
+  - includes the code for figures 3-5. The data for those figures are available here [here] (https://www.nytimes.com/).
+- map_reads.sh 
+  - Maps reads.
+- call_variants_gatk.sh 
+  - Calls variants with GATK. 
+- call_variants_samtools.sh 
+  - Calls variants with Samtools. 
+- call_variants_deepvariant.sh 
+  - Calls variants with DeepVariant. 
+- filter_variants.sh 
+  - Filters VCF files. 
+- haplidify.py
+  - Converts diploid single-sample VCF file to haplid VCF file using allele depth information.  
+- format_single_vcf.sh 
+  - Adds single sample VCF INFO fields including QUAL and FILTER to the FORMAT field before merging in order to preserve single-sample information when merging several samples into a multi-sample VCF (i.e. for examining pairwise differences).
+- run_happy.sh 
+  - Tests performance of a pipeline in recovering true variants.
 
 
