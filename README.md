@@ -1,6 +1,8 @@
-# M. tuberculosis variant calling project.
+# **M. tuberculosis** variant calling project.
 
-Here we include scripts to create the plots in our paper, Variant calling approaches alter transmission inferences in Mycobacterium tuberculosis genomic epidemiology studies, available [here] (https://www.nytimes.com/). 
+Here we include scripts to create the plots in our paper, Variant calling approaches alter transmission inferences in **Mycobacterium tuberculosis** genomic epidemiology studies, available [here] (https://www.nytimes.com/). 
+
+- Add short abstract here. 
 
 ## Scripts included. 
 
@@ -12,5 +14,7 @@ Here we include scripts to create the plots in our paper, Variant calling approa
 - call_variants_deepvariant.sh Calls variants with DeepVariant. 
 - filter_variants.sh Filters VCF files. Haploidifies DeepVariant diploid VCF files. 
 - run_happy.sh Tests performance of a pipeline in recovering true variants (requires a query VCF, truth VCF, and reference fasta).
+- haploidify.py
+--Converts diploid single-sample VCF file to haplid VCF file using allele depth information. 
 
 
