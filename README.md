@@ -6,10 +6,6 @@ Here we include scripts to create the plots in our paper, Variant calling approa
 
 ## Scripts included. 
 
-- plot_roetzer_variants.R 
-  - includes the code for figures 1 and 2. The VCF, FASTA, and tree files associated with each pipeline are available [here] (add URL). 
-- plot_outbreak_performance.R 
-  - includes the code for figures 3-5. The data for those figures are available here [here] (https://www.nytimes.com/).
 - map_reads.sh 
   - Maps reads.
 - call_variants_gatk.sh 
@@ -26,5 +22,11 @@ Here we include scripts to create the plots in our paper, Variant calling approa
   - Adds single sample VCF INFO fields including QUAL and FILTER to the FORMAT field before merging in order to preserve single-sample information when merging several samples into a multi-sample VCF (i.e. for examining pairwise differences).
 - run_happy.sh 
   - Tests performance of a pipeline in recovering true variants.
+-vqsr.sh
+  - Apply GATK's VQSR, using an internal training set (defined here as variants with QUAL > the mean).
 
+- plot_roetzer_variants.R 
+  - includes the code for figures 1 and 2. The VCF, FASTA, and tree files associated with each pipeline are available in the Supplementary Files.  
+- plot_outbreak_performance.R 
+  - includes the code for figures 3-5. The data for those figures are available in the Supplementary Files.
 
