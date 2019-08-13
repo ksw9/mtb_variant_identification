@@ -51,7 +51,7 @@ Cv  <- as.numeric(read.vcfR('vcfs/C.vcf.gz', verbose = FALSE )@fix[,2])
 Dv  <- as.numeric(read.vcfR('vcfs/D.vcf.gz', verbose = FALSE )@fix[,2])
 
 # Roetzer sites.
-Ev <- as.numeric(as.character(read.csv('metadata/roetz-tabS1.csv', header=F, stringsAsFactors=F)[1,2:86]))
+Ev <- as.numeric(as.character(read.csv('vcfs/roetz-tabS1.csv', header=F, stringsAsFactors=F)[1,2:86]))
 
 ## Read in FASTA files for each group with ape.
 Afa <- read.dna('fastas/A.fa', format='fasta')
@@ -76,7 +76,7 @@ Ebs <- unroot(read.tree(file = 'trees/E.fa_GTR.raxml.bootstraps'))
 
 ######################################
 #### Plot Venn diagram & SNP totals ##
-##########################################
+######################################
 # make quintuple Venn diagram
 area1 <- length(Av)
 area2 <- length(Bv) + 2 # Add 2 snps called by pipeline B on  (could not be lifted over)
