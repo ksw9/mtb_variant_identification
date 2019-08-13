@@ -1,6 +1,6 @@
-# Variant calling for * *M. tuberculosis* * transmission inference.
+# Variant calling for *M. tuberculosis* transmission inference.
 
-Here we include scripts to create the plots in our paper, Variant calling approaches alter transmission inferences in * *Mycobacterium tuberculosis* * genomic epidemiology studies, available [here] (https://www.nytimes.com/). 
+Here we include scripts to create the plots in our paper, Variant calling approaches alter transmission inferences in *Mycobacterium tuberculosis* genomic epidemiology studies, available [here] (https://www.nytimes.com/). 
 
 - Add short abstract here. 
 
