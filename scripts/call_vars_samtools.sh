@@ -5,16 +5,12 @@
 module load anaconda; source activate gatk_4.0.0.0_kwalter
 module load samtools/1.9
 module load htslib/1.9
-BCFTOOLS=/ifs/labs/andrews/walter/repos/bcftools/bcftools
 
 # Read from command line: ref genome, fastq 1, fastq 2.
 ref=$1 
 bam=$2 
 ploidy=$3
 VARS_DIR=$4 
-
-# Local variables
-TMP_DIR=/local/scratch/kwalter/${mapper}/
 
 # Move to vars_dir if variable is set.
 echo $VARS_DIR
@@ -37,7 +33,7 @@ prefix=${bam/.*}
 prefix=$(basename $prefix)
     
 # Call variants singly. Adds additional annotations for downstream filtering. 
-${BCFTOOLS} mpileup -Ou -f ${ref} --threads 8 -a INFO/ADF,INFO/ADR,FORMAT/AD,DP,SP ${bam}  | ${BCFTOOLS} call --threads 8 --ploidy ${ploidy} -m -O z --gvcf 0 -o ${prefix}_samtools.vcf.gz 
+bcftools mpileup -Ou -f ${ref} --threads 8 -a INFO/ADF,INFO/ADR,FORMAT/AD,DP,SP ${bam}  | bcftools call --threads 8 --ploidy ${ploidy} -m -O z --gvcf 0 -o ${prefix}_samtools.vcf.gz 
 	
 # bgzip file and index
 tabix -p vcf ${prefix}_samtools.vcf.gz

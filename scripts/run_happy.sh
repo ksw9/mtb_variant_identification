@@ -2,9 +2,6 @@
 # Run Illumina hap.py to calculate performance metrics. Requires (1) reference fasta, (2) query VCF, (3) truth VCF, and optionally: (4) filter, (5) genomic region, (6) ROC field.
 
 # Source environment with all necessary software.
-module load anaconda; source activate gatk_4.0.0.0_kwalter
-module purge
-module load anaconda
 source activate hap.py_0.3.10
 
 # Read from command line

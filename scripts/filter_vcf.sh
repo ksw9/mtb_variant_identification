@@ -1,9 +1,10 @@
 #!/bin/bash
-# Soft-filter VCF files. Requires (1) reference fasta, (2) input VCF. 
+# Soft-filter VCF files. Requires (1) reference fasta, (2) input VCF, (3) scripts directory.
 
 # read from command line
 ref=$1
 vcf=$2
+SCRIPTS_DIR=$3
 
 # Define prefix for naming subsequent VCF files. 
 prefix=$(basename ${vcf/.*})
@@ -19,9 +20,6 @@ norm_vcf=${prefix}_norm.vcf.gz
 hap_vcf=${prefix}_hap.vcf
 tmp_vcf=${prefix}_tmp.vcf.gz
 tmp_vqsr_vcf=${prefix}_tmp_vqsr.vcf.gz
-
-BCFTOOLS=/ifs/labs/andrews/walter/repos/bcftools/bcftools
-SCRIPTS_DIR=/ifs/labs/andrews/walter/varcal/scripts/
 
 # Tabix index
 tabix -p vcf ${vcf}
@@ -49,7 +47,7 @@ if [[ "$vcf" == *"deep.g.vcf.gz" ]]; then
   tabix -f -p vcf ${hap_vcf}.gz
   
   # Make an all sites samtools file before applying filters (filtering first on the GVCF version works strangely). 
-  ${BCFTOOLS} convert --gvcf2vcf ${hap_vcf}.gz --fasta-ref ${ref} -O z -o ${allsites_vcf}
+  bcftools convert --gvcf2vcf ${hap_vcf}.gz --fasta-ref ${ref} -O z -o ${allsites_vcf}
 
   # Index allsites haploid VCF.
   tabix -f -p vcf ${allsites_vcf}
@@ -101,16 +99,16 @@ if [[ "$vcf" == *"samtools.vcf.gz" ]]; then
   -A StrandOddsRatio
    
   # Normalize alleles. 
-  ${BCFTOOLS} norm --fasta-ref ${ref} ${ann_vcf} -O z -o ${norm_vcf}
+  bcftools norm --fasta-ref ${ref} ${ann_vcf} -O z -o ${norm_vcf}
 
   # Make an all sites samtools file before applying filters (filtering the GVCF version works strangely). 
-  ${BCFTOOLS} convert --gvcf2vcf ${norm_vcf} --fasta-ref ${ref} -O z -o ${tmp_vcf}
+  bcftools convert --gvcf2vcf ${norm_vcf} --fasta-ref ${ref} -O z -o ${tmp_vcf}
  
   # Index allsites vcf - may not be able to index because of unsorted positions. 
   tabix -f -p vcf ${tmp_vcf}
   
   # Sort.
-  ${BCFTOOLS} sort ${tmp_vcf} -O z -o ${allsites_vcf}
+  bcftools sort ${tmp_vcf} -O z -o ${allsites_vcf}
 
   # Index sorted vcf
   tabix -f -p vcf ${allsites_vcf}
@@ -151,7 +149,7 @@ fi
   ${SCRIPTS_DIR}vqsr.sh ${ref} ${tmp_vcf}
 
   # Apply filters not to VQSR file. Don't use: RGQ < 20 filter (isn't applied to samtools files).
-  ${BCFTOOLS} filter --mode + --soft-filter 'lowQ' -e 'QUAL < 40' ${vcf} -O z | $BCFTOOLS filter --mode + --soft-filter 'lowD' -e 'INFO/DP < 5' -O z > ${filt_vcf}
+  bcftools filter --mode + --soft-filter 'lowQ' -e 'QUAL < 40' ${vcf} -O z | $BCFTOOLS filter --mode + --soft-filter 'lowD' -e 'INFO/DP < 5' -O z > ${filt_vcf}
 
   # Index filtered VCF
   tabix -f -p vcf ${filt_vcf}
