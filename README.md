@@ -22,11 +22,30 @@ Here we include scripts to create the plots in our paper, Variant calling approa
   - Adds single sample VCF INFO fields including QUAL and FILTER to the FORMAT field before merging in order to preserve single-sample information when merging several samples into a multi-sample VCF (i.e. for examining pairwise differences).
 - run_happy.sh 
   - Tests performance of a pipeline in recovering true variants.
--vqsr.sh
+- vqsr.sh
   - Apply GATK's VQSR, using an internal training set (defined here as variants with QUAL > the mean).
 
 - plot_roetzer_variants.R 
   - includes the code for figures 1 and 2. The VCF, FASTA, and tree files associated with each pipeline are available in the Supplementary Files.  
 - plot_outbreak_performance.R 
   - includes the code for figures 3-5. The data for those figures are available in the Supplementary Files.
+
+
+## Required tools. 
+
+- Bowtie2	http://bowtie-bio.sourceforge.net/bowtie2/index.shtml
+
+- BWA	http://bio-bwa.sourceforge.net/
+
+- SMALT	https://www.sanger.ac.uk/science/tools/smalt-0
+
+- Sambamba	https://lomereiter.github.io/sambamba/
+
+- Bcftools/Samtools	https://samtools.github.io/bcftools/
+
+- GATK	https://software.broadinstitute.org/gatk/
+
+- DeepVariant	https://github.com/google/deepvariant
+
+- hap.py	https://github.com/Illumina/hap.py
 
