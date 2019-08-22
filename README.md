@@ -26,10 +26,12 @@ Here we include scripts to create the plots in our paper, available [here].
 - vqsr.sh
   - Apply GATK's VQSR, using an internal training set of high-quality variants (defined here as variants with QUAL > the mean).
 - plot_roetzer_variants.R 
-  - includes the code for figures 1 and 2. The VCF, FASTA, and tree files associated with each pipeline are located in the data directory..  
+  - This script compares variants identified by 5 different groups within the same sequence data from a clonal M. tuberculosis outbreak. 
+  - Sequence data from Roetzer et al. 2013 Plos Med, (ENA Study Accession: PRJEB6945).
 
 ## Data 
-- A zipped archive including the submitted and formatted vcfs and fasta files from 5 different groups for the same sequence data from a clonal *M. tuberculosis* outbreak. 
+- A zipped archive including the submitted and formatted vcfs and fasta files from 5 different groups for the same sequence data from a clonal *M. tuberculosis* outbreak, that can be analyzed with plot_roetzer_variants.R.
+- Includes vcfs, fastas, bootstrap replicate trees fit by raxml-ng, and accompanying sample metadata from the original study, Roetzer et al. 2013 Plos Med. 
 
 ## Required tools. 
 
