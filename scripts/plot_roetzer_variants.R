@@ -2,6 +2,9 @@
 ## Part A: Roetzer analysis ##
 ##############################
 
+## This script compares variants identified by 5 different groups within the same sequence data from a clonal M. tuberculosis outbreak. 
+## Sequence data from Roetzer et al. 2013 Plos Med, (ENA Study Accession: PRJEB6945).
+
 rm(list = ls())
 
 ## Set up workspace.
@@ -28,21 +31,15 @@ library(readxl)
 library(r2d3)
 library(gg3D)
 library(cowplot)
+library(viridis)
+library(gridExtra)
 
-## Set wd.
-setwd("~/Box/Box/TB/VariantCalling/roetzer/")
-load(file = 'roetzer2.RData')
-#save.image(file = 'roetzer2.RData')
+# Set wd.
+#setwd()
 
-#####################
-## Organize files. ##
-#####################
-
-## Roetzer as fasta.
-#roetzer <- read.csv('metadata/roetz-tabS1.csv', stringsAsFactors = FALSE)
-
-# Convert to alignment
-#Efa <- as.DNAbin(seqinr::as.alignment(seq = roetzer$Concat, nam = roetzer$X, nb=86))
+##############
+## Organize ##
+##############
 
 ## Read in multi-sample VCF files. And get SNP positions. 
 Av <- as.numeric(read.vcfR('vcfs/A.vcf.gz', verbose = FALSE )@fix[,2])
@@ -50,8 +47,8 @@ Bv  <- as.numeric(read.vcfR('vcfs/B.vcf.gz', verbose = FALSE )@fix[,2])
 Cv  <- as.numeric(read.vcfR('vcfs/C.vcf.gz', verbose = FALSE )@fix[,2])
 Dv  <- as.numeric(read.vcfR('vcfs/D.vcf.gz', verbose = FALSE )@fix[,2])
 
-# Roetzer sites.
-Ev <- as.numeric(as.character(read.csv('vcfs/roetz-tabS1.csv', header=F, stringsAsFactors=F)[1,2:86]))
+# Roetzer sites (variants identified by original study and Sanger-confirmed).
+Ev <- as.numeric(as.character(read.csv('metadata/roetz-tabS1.csv', header=F, stringsAsFactors=F)[1,2:86]))
 
 ## Read in FASTA files for each group with ape.
 Afa <- read.dna('fastas/A.fa', format='fasta')
@@ -74,9 +71,14 @@ Cbs <- unroot(read.tree(file = 'trees/C.fa_GTR.raxml.bootstraps'))
 Dbs <- unroot(read.tree(file = 'trees/D.fa_GTR.raxml.bootstraps'))
 Ebs <- unroot(read.tree(file = 'trees/E.fa_GTR.raxml.bootstraps'))
 
-######################################
-#### Plot Venn diagram & SNP totals ##
-######################################
+# Read in metadata from Roetzer et al. 2013, Plos Med. 
+meta <- read.csv('metadata/roetz-tabS2.csv', stringsAsFactors = F)
+
+#########################################
+## Compare VCFs and pairwise distances ##
+#########################################
+
+#### Plot Venn diagram & SNP totals. ####
 # make quintuple Venn diagram
 area1 <- length(Av)
 area2 <- length(Bv) + 2 # Add 2 snps called by pipeline B on  (could not be lifted over)
@@ -90,18 +92,9 @@ totals <- data.frame(pipelines, c( area1,area2,area3,area4,area5))
 names(totals) <- c('pipeline', 'SNPs')
 totals
 
-# Plot SNP totals.  
-g0 <- ggplot(totals, aes(x = pipeline, y = SNPs, fill = pipeline)) + 
-  geom_col()  + 
-  theme_minimal()+
-  ylab('Total SNPs identified in outbreak isolates') + 
-  xlab('Pipeline')
-
-# Extract pipeline colors for consistency across plots.
-g <- ggplot_build(g0)
-clrs <- g$data[[1]]$fill
-names(clrs) <- pipelines
-clrs[5] <- 'grey'
+# Define color palette.
+pal <- viridis(5)
+names(pal) <- pipelines
 
 # Replot SNP totals with pipeline color.
 g1 <- ggplot(totals, aes(x = pipeline, y = SNPs, fill = pipeline)) + 
@@ -109,13 +102,11 @@ g1 <- ggplot(totals, aes(x = pipeline, y = SNPs, fill = pipeline)) +
   theme_minimal()+
   ylab('Total internal SNPs') + 
   xlab('Pipeline') + 
-  scale_fill_manual(values = c(clrs)) +
-  theme(text = element_text(size=16))  + 
-  theme(legend.position = "none") 
+  scale_fill_manual(values = pal,  name = 'Pipeline') +
+  theme_classic(base_size = 14)  
 g1
 
 ## Plot Venn of shared SNP calls.
-
 n12 <- length(intersect(Av, Bv))
 n13 <- length(intersect(Av, Cv))
 n14 <- length(intersect(Av,Dv))
@@ -160,30 +151,18 @@ venn <- draw.quintuple.venn(area1 = area1, area2 = area2, area3 = area3,
                             n1235 = n1235, n1245 = n1245,n1345 = n1345, n2345 = n2345,
                             n12345 = n12345,
                             category = pipelines,
-                            fill = clrs,
+                            fill = pal,
                             lty = "dashed",
                             cex = 1,
                             cat.cex = 2,
-                            cat.col = clrs,
+                            cat.col = pal,
                             #cat.col = c("orange", "red", "green", "blue", "grey"), scaled = TRUE,
                             margin = 0.05, 
                             alpha = rep(.7,5))
 # Plot.
 grid.draw(venn)
 
-## What explains differences between pipelines A,B, and E?
-# Sites shared by A & E, not B. 19 sites.
-setdiff(intersect(Av,Ev), Bv)
-
-# Sites shared by B & E, not A: 2 sites.
-setdiff(intersect(Bv,Ev), Av)
-
-# Sites shared by A & B, not E: 2 sites.
-setdiff(intersect(Av,Bv), Ev)
-
-############################################
-## Sensitivity in detecting Roetzer sites ##
-############################################
+#### Sensitivity in detecting Roetzer sites ####
 # Length of Roetzer Sanger-confirmed SNPs.
 n <- length(Ev)
 
@@ -202,15 +181,34 @@ g2 <-  ggplot(totals[which(totals$pipeline != 'E'),], aes(x = pipeline, y = sens
   theme_minimal() +
   ylab('Sensitivity (%) ') + 
   xlab('Pipeline') +
-  scale_fill_manual(values = c(clrs), name = 'Pipeline') +
+  scale_fill_manual(values = pal, name = 'Pipeline') +
   ylim(0,100)+
-  theme(text = element_text(size=16)) 
+  theme_classic(base_size = 14) 
 g2
 
+# Get legend from g1
+legend <- get_legend(
+  # create some space to the left of the legend
+  g1 + theme(legend.box.margin = margin(0, 0, 0, 12))
+)
 
-##############################
-## Pairwise distance plots ##
-#############################
+# Arrange the three plots without legends.
+p1 <- plot_grid(
+  g1 + theme(legend.position="none"),
+  venn, 
+  g2 + theme(legend.position="none"),
+  legend,
+  labels = c('a','b','c'),
+  ncol = 2, 
+  hjust = -1
+)
+p1
+
+# Save
+#ggsave(p1, file = 'plots/fig1.pdf', width = 10, height = 10)
+
+#### Pairwise distance plots. ####
+
 # For each msa, get pairwise distances. 
 Ad <- ape::dist.dna(Afa, model = 'N' )
 Bd <- ape::dist.dna(Bfa, model = 'N' )
@@ -237,11 +235,11 @@ g3 <- ggplot(d, aes(y = distance, x = pipeline, fill = pipeline)) +
   geom_violin() + 
   ylab('Pairwise SNP distances') +
   xlab('Pipeline') +
-  geom_hline(yintercept=12, color = "red", lty = 4) +
-  geom_hline(yintercept=5, color = "red", lty = 4) +
+  geom_hline(yintercept=12, lty = 4) +
+  geom_hline(yintercept=5, lty = 4) +
   scale_y_continuous(trans='log10') +
-  theme_minimal() +
-  scale_fill_manual(values = c(clrs))+
+  theme_classic() +
+  scale_fill_manual(values = pal )+
   theme(text = element_text(size=16)) + 
   theme(legend.position = "none") 
 g3
@@ -266,22 +264,21 @@ thresholds2$variable <- factor(thresholds2$variable,levels(thresholds2$variable)
 # order factor 
 thresholds2$variable <- factor(thresholds2$variable, levels = c("5 SNPs", "12 SNPs"))
 
+# Define 2-color palette. 
+pal2 <- viridis(10)[c(2,8)]
+names(pal2) <- unique(thresholds2$variable)
+
 # Barplot of those distances falling under a threshold. 
 g4 <- ggplot(thresholds2, aes(y = value, fill = variable, x = pipeline)) +
   geom_bar(stat = 'identity', position=position_dodge()) + 
   ylab('Potential transmission pairs (%)' ) +
   xlab('Pipeline' ) +
-  theme_minimal() +
+  theme_classic() +
   theme(legend.title=element_blank())  +
-  theme(text = element_text(size=16))
+  theme(text = element_text(size=16)) + 
+  scale_fill_manual(values = pal2)
 
 g4
-
-## Extract colors for thresholds.
-g <- ggplot_build(g4)
-thresh_clrs <- unique(g$data[[1]]$fill)
-names(thresh_clrs) <- unique(thresholds2$variable)
-colScale <- scale_colour_manual(values = thresh_clrs)
 
 ## Pairwise comparison of differences between A and B pipelines (all samples were called for both).
 B_labels <- sapply(labels(Bfa), function(x) strsplit(x,'_')[[1]][1])
@@ -292,7 +289,7 @@ A_order <- sapply(B_labels, function(x) which(labels(Afa) == x)[1])
 # Check order is correct: 
 labels(Afa)[A_order] 
 
-# Reorder liu
+# Reorder A.
 A_mat <- as.matrix(Ad)[A_order,A_order]
 
 # Convert back to dist. 
@@ -307,17 +304,17 @@ g5 <- ggplot(A_B_dists, aes(x = X1, y = X2)) +
   geom_jitter(cex = .5) +
   xlab('Pipeline A pairwise distance (SNPs)') +
   ylab('Pipeline B pairwise distance (SNPs)') +
-  geom_hline(yintercept=thresh5, color=thresh_clrs[1], lty = 4) + 
-  geom_vline(xintercept=thresh5, color=thresh_clrs[1], lty = 4)+
-  geom_hline(yintercept=thresh12, color=thresh_clrs[2], lty = 4) + 
-  geom_vline(xintercept=thresh12, color=thresh_clrs[2], lty = 4) +
+  geom_hline(yintercept=thresh5, color=pal2[1], lty = 4) + 
+  geom_vline(xintercept=thresh5, color=pal2[1], lty = 4)+
+  geom_hline(yintercept=thresh12, color=pal2[2], lty = 4) + 
+  geom_vline(xintercept=thresh12, color=pal2[2], lty = 4) +
   # shade area in which inference is changed
-  annotate("rect", ymin=0, ymax=thresh5, xmin = thresh5, xmax=15, alpha="0.5", fill= thresh_clrs[1])  +
-  annotate("rect", ymin=thresh5, ymax=20, xmin = 0, xmax=thresh5, alpha="0.5", fill= thresh_clrs[1])  +
-  annotate("rect", ymin=0, ymax=thresh12, xmin = thresh12, xmax=15, alpha="0.5", fill= thresh_clrs[2])  + 
-  annotate("rect", ymin=thresh12, ymax=20, xmin = 0, xmax = thresh12, alpha="0.5", fill= thresh_clrs[2])  + 
-  theme_minimal() +
-  theme(text = element_text(size=16))
+  annotate("rect", ymin=0, ymax=thresh5, xmin = thresh5, xmax=15, alpha="0.5", fill= pal2[1])  +
+  annotate("rect", ymin=thresh5, ymax=20, xmin = 0, xmax=thresh5, alpha="0.5", fill= pal2[1])  +
+  annotate("rect", ymin=0, ymax=thresh12, xmin = thresh12, xmax=15, alpha="0.5", fill= pal2[2])  + 
+  annotate("rect", ymin=thresh12, ymax=20, xmin = 0, xmax = thresh12, alpha="0.5", fill= pal2[2])  + 
+  theme_classic() +
+  theme(text = element_text(size=14))
 g5
 
 # What is correlation between pairwise distances for both pipelines?
@@ -343,15 +340,19 @@ length(which(A_mat >5 & Bd <=5))
 t <- merge(totals, thresholds)
 
 # Select rows for table
-tt <- t[,c(1,9,2:8)]
+tt <- t[,c(1,10,2:3,5:9)]
 colnames(tt) <- c('Pipeline','Samples', 'SNPs', 'Sensitivity','Mean pairwise', 'Median pairwise', 'Identical (%)', 
-                  "\u2264 5 SNPs (%)", "\u2264 12 SNPs (%)") 
-# Round
-tt[,c(7:9)] <- round(tt[,c(7:9)],2)
-row.names(tt) <- NULL
+                  "<= 5 SNPs (%)", "<= 12 SNPs (%)") 
 
-# Save table as csv.
-#write.csv(tt, row.names = F, file = 'plots/table1.csv')
+# Round to 1 decimal. 
+tt[,c(4,5,7:9)] <- format(round(tt[,c(4,5,7:9)], digits=1), nsmall = 1) 
+row.names(tt) <- NULL
+tt
+
+# Save table.
+pdf(file ='plots/roetzer_table.pdf', height = 2, width = 10)
+grid.table(tt, rows = NULL)
+dev.off()
 
 ####################
 ## Plot tree sets ##
@@ -399,10 +400,10 @@ for (nn in 1:length(Ebs)){
 }
 
 # Create set of trees with bootstrap (for memory: sample 50 bs replicates from each pipeline). 
-tset_bs <- c(sample(Abs, 50), sample(Bbs,50), sample(Dbs,50), sample(Ebs,50))
+tset_bs <- c(sample(Abs, 100), sample(Bbs,100), sample(Dbs,100), sample(Ebs,100))
 
 # Tree names
-names(tset_bs) <- c(names(Abs)[1:50], names(Bbs)[1:50], names(Cbs)[1:50], names(Dbs)[1:50])
+names(tset_bs) <- c(names(Abs)[1:100], names(Bbs)[1:100], names(Cbs)[1:100], names(Dbs)[1:100])
 
 # Root trees on earliest isolate from 1997. 
 tset_rooted <- lapply(tset_bs, function(x) root(x, 'ERR552368', resolve.root = TRUE))
@@ -415,24 +416,26 @@ res_rf <- treespace(tset_bs, nf=5, 'RF')
 rf_groves <- findGroves(res_rf, nclust=4)
 
 # Table group assignments by pipeline.
-rf_groves$pipeline <- c(rep('A',50), rep('B',50), rep('D',50), rep('E', 50))
+rf_groves$pipeline <- c(rep('A',100), rep('B',100), rep('D',100), rep('E', 100))
 table(rf_groves$groups, rf_groves$pipeline)
 
 # Extract x,y,z coordinates.
 scatter_rf <- cbind(rf_groves$treespace$pco$li, Cluster = rf_groves$groups)
 
 # Define pipeline. 
-scatter_rf$Pipeline <- c(rep('A',50), rep('B',50), rep('D',50), rep('E', 50))
+scatter_rf$Pipeline <- c(rep('A',100), rep('B',100), rep('D',100), rep('E', 100))
 
 # 3-D scatterplot: RF distances.
 g9 <- ggplot(scatter_rf, aes(x=A1, y=A2, z=A3, shape=Cluster, color = Pipeline)) + 
   theme_void() +
   axes_3D() +
-  scale_color_manual(values = c(clrs)) +
+  scale_color_manual(values = c(pal)) +
   stat_3D() 
 g9
 
 # Save figure 2.
-fig2 <- plot_grid(g3,g4,g5,g9, labels = c('a','b','c','d'))
+fig2 <- plot_grid(g3,g4,g5,g9, labels = c('a','b','c','d'), scale = 0.9)
 fig2
-ggsave(fig2, file = 'plots/fig2_081119.pdf', width = 10, height = 10)
+
+# Save.
+#ggsave(fig2, file = 'plots/fig2.pdf', width = 10, height = 10)
