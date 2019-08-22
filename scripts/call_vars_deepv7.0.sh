@@ -1,12 +1,14 @@
 #!/bin/bash 
-# Script to call variants with DeepVariant v.7.0. Requires (1) reference, (2) bam, (3) directory, (4) number of shards for parallelization, (5) path to DeepVariant trained model.
+# Script to call variants with DeepVariant v.7.0. Requires (1) reference, (2) bam, (3) directory, (4) number of shards for parallelization. 
 # Cals diploid variants. 
 
 ref=$1
 bam=$2
 VARS_DIR=$3
-NSHARDS=$4
-MODELS-$5
+NSHARDS=${4:-6}
+
+# Path to trained model.
+MODELS=/ifs/labs/andrews/walter/varcal/rui/data/DeepVariant-inception_v3-0.7.0+data-wgs_standard/model.ckpt
 
 # Move to vars_dir if variable is set.
 echo $VARS_DIR

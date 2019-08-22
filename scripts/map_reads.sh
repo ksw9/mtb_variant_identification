@@ -6,7 +6,7 @@ module load anaconda
 source activate gatk_4.0.0.0_kwalter
 
 # Read from command line: ref genome, fastq 1, fastq 2.
-ref=${1} # 1st input is full path to reference genome
+ref=${1:-/ifs/labs/andrews/walter/varcal/data/refs/H37Rv.fa} # 1st input is full path to reference genome
 mapper=$2 # 2nd input is mapping algorithm 
 p1=$3  # 3th input is full path to read 1
 p2=$4  # 4th input is full path to read 2 (if paired-end)
@@ -153,7 +153,48 @@ if [ $mapper == 'smalt' ]; then
     exit 1
   fi
 fi
- d
+
+# stampy mapping
+if [ $mapper == 'stampy' ]  ; then
+
+  # if the mapper is stampy, then use activate python2.7 environment
+ source activate py27
+
+  # if no indexing, index reference genome
+  if [ ! -f ${ref%.*}".stidx" ] ; then
+  echo "stampy indexing $ref" >&2
+  
+  # first, build the genome file
+  /ifs/labs/andrews/walter/bin/stampy-1.0.32/stampy.py --species=Mtb --assembly ${ref/.fa} -G ${ref_index} ${ref} 
+  
+  # second, build a hash (.sthash) file:
+  /ifs/labs/andrews/walter/bin/stampy-1.0.32/stampy.py -g ${ref_index} -H ${ref_index}
+
+  fi 
+
+  # map
+  #if paired-end reads
+  echo "mapping with stampy" >&2
+  if [ ! -z ${p2} ]; then 
+     /ifs/labs/andrews/walter/bin/stampy-1.0.32/stampy.py -g ${ref_index} -h ${ref_index} -M ${p1} ${p2} > ${sam}
+  # if single-end reads
+  elif [  -z ${p2} ]; then 
+    echo "single reads"
+   /ifs/labs/andrews/walter/bin/stampy-1.0.32/stampy.py -g ${ref_index} -h${ref_index} -M ${p1} > ${sam}
+  
+  fi
+  # Error handling
+  if [ "$?" != "0" ]; then
+    echo "[Error]" $LINENO "stampy mapping failed ${p1}!" 1>&2
+    exit 1
+  fi
+  
+  # for stampy: reset working environment for post-processing SAM files
+  module purge
+  module load anaconda3/2017-12-12; source activate gatk-enhanced
+
+fi
+
 
 #### POST-PROCESSING ####
 
