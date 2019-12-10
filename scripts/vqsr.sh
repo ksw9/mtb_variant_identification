@@ -1,40 +1,36 @@
 #!/bin/bash
-# Variant quality score recalibration (VQSR) with GATK. Takes (1) reference genome and (2) VCF file.
+# Variant quality score recalibration (VQSR) with GATK. 
+# Takes (1) reference genome and (2) VCF file.
+# By default, this uses the variants with QUAL > mean QUAL as "truth set" for training. 
 
 # read from command line
 ref=$1
 vcf=$2
 
-# Local variables
-GATK_PATH=/ifs/labs/andrews/walter/bin/gatk-4.1.0.0/gatk
-BCFTOOLS=/ifs/labs/andrews/walter/repos/bcftools/bcftools
-
-# set up environment
-module load anaconda
-source activate gatk_4.0.0.0_kwalter
-module load gatk 
+# Set up environment.
+source config.txt
 
 # get basename
 base=${vcf%.vcf*}
 base=$(basename $base)
 
 # get mean QUAL, excluding QUAL of invariant sites, to select variants for training
-qual=$(${BCFTOOLS} filter -i 'TYPE == "SNP"'  ${vcf}  | ${BCFTOOLS} query  -f '[%QUAL\n]' | grep -v inf | \
+qual=$(${BCFTOOLS} filter -i 'TYPE == "SNP"'  ${vcf}  | ${BCFTOOLS} query  -f '%QUAL\n' | grep -v inf | \
   awk '{ sum += $1; n++ } END { if (n > 0) print sum / n; }' )
 
 # echo qual
 echo 'mean qual of variant sites': $qual
 
-# Create truth set by selecting only high qual variants and only variant sites.
+# Create truth set by selecting only high qual variants (QUAL > mean) among variant sites.
 ${BCFTOOLS} view --types snps ${vcf} | ${BCFTOOLS} filter -e 'QUAL == inf' | ${BCFTOOLS} filter -i " QUAL > $qual " > ${base}_training_sites.vcf
 
 # Index vcf.
 bgzip -f ${base}_training_sites.vcf > ${base}_training_sites.vcf.gz
 tabix -f -p vcf ${base}_training_sites.vcf.gz
 
-# Recalibrate variants. Try first with 6 variant annotations. 
-if 
-${GATK_PATH}  VariantRecalibrator \
+# Recalibrate variants. 
+
+${GATK_4.1} VariantRecalibrator \
 -R ${ref} \
 --variant ${vcf} \
 --resource:truePos,known=false,training=true,truth=true,prior=15 ${base}_training_sites.vcf.gz \
@@ -55,7 +51,7 @@ ${GATK_PATH}  VariantRecalibrator \
 
 elif
 # If failed, remove MQRankSum which may not have sufficient variation.
-${GATK_PATH}  VariantRecalibrator \
+${GATK_4.1} VariantRecalibrator \
 -R ${ref} \
 --variant ${vcf} \
 --resource:truePos,known=false,training=true,truth=true,prior=15 ${base}_training_sites.vcf.gz \
@@ -75,7 +71,7 @@ ${GATK_PATH}  VariantRecalibrator \
 
 elif
 # If failed, remove ReadPosRankSum which may not have sufficient variation.
-${GATK_PATH}  VariantRecalibrator \
+${GATK_4.1} VariantRecalibrator \
 -R ${ref} \
 --variant ${vcf} \
 --resource:truePos,known=false,training=true,truth=true,prior=15 ${base}_training_sites.vcf.gz \
@@ -94,8 +90,9 @@ then
   echo 'VQSR w/o ReadPosRankSum'
   
 else 
+
 # If failed, remove both MQRankSum and ReadPosRankSum, which may not have sufficient variation.
-${GATK_PATH}  VariantRecalibrator \
+${GATK_4.1} VariantRecalibrator \
 -R ${ref} \
 --variant ${vcf} \
 --resource:truePos,known=false,training=true,truth=true,prior=15 ${base}_training_sites.vcf.gz \
@@ -118,7 +115,7 @@ fi
 ts_filter=99.0
 
 # Apply VQSR.
-${GATK_PATH} ApplyVQSR \
+${GATK_4.1} ApplyVQSR \
 -R ${ref} \
 -mode SNP \
 --variant ${vcf}  \
@@ -139,7 +136,7 @@ failedSites=$(bcftools query  -f '%INFO/VQSLOD\n' ${base}_vqsr.vcf | grep '\inf$
 if [ "$failedSites" -ne 0 ]; then
     echo 'rerunning with maxGaussians set to 1'
   
-	${GATK_PATH} --java-options  "-Xmx20g"  VariantRecalibrator \
+	${GATK_4.1}  --java-options  "-Xmx20g"  VariantRecalibrator \
 	-R ${ref} \
 	--variant ${vcf} \
 	--resource:truePos,known=false,training=true,truth=true,prior=15 ${base}_training_sites.vcf.gz \
@@ -156,7 +153,7 @@ if [ "$failedSites" -ne 0 ]; then
 	--tranches-file ${base}".tranches"  \
 	-tranche 100.0 -tranche 99.0 -tranche 96.0 -tranche 93.0 -tranche 90.0 
 
-	# define trance filter level
+	# define tranch filter level
 	ts_filter=99.0
 
 	# recalibration to SNPs 

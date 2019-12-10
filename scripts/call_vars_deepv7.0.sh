@@ -5,15 +5,16 @@
 ref=$1
 bam=$2
 VARS_DIR=$3
-NSHARDS=${4:-6}
+NSHARDS=${4:-6} # Default NSHARDS is 6.
 
-# Path to trained model.
-MODELS=/ifs/labs/andrews/walter/varcal/rui/data/DeepVariant-inception_v3-0.7.0+data-wgs_standard/model.ckpt
+# Set up environment.
+source config.txt
 
-# Move to vars_dir if variable is set.
+# Move to vars_dir if variable is set, otherwise set VARS_DIR to current working directory. 
 echo $VARS_DIR
 if [ -z "$VARS_DIR" ]; then
   echo 'no output directory specified'
+  VARS_DIR=$(pwd)
   else 
   echo $VARS_DIR specified
   cd $VARS_DIR
@@ -34,7 +35,7 @@ echo 'make examples'
 
 time seq 0 $((NSHARDS-1)) | \
 parallel --eta --halt 2 --joblog "log"  \
-/opt/deepvariant/bin/make_examples \
+${DEEPVAR}make_examples \
 --mode calling \
 --ref $ref \
 --reads $bam \
@@ -46,16 +47,16 @@ parallel --eta --halt 2 --joblog "log"  \
 
 echo 'calling variants'
 
-/opt/deepvariant/bin/call_variants \
+${DEEPVAR}call_variants \
 --outfile ${prefix}.tfrecord.gz \
 --examples ${prefix}@${NSHARDS}.tfrecord.gz \
---checkpoint ${MODELS}
+--checkpoint ${DEEPVAR_MODEL}
  
 ##Stage 3: Post process variants
 
 echo 'post processing variants'
 
-/opt/deepvariant/bin/postprocess_variants \
+${DEEPVAR}postprocess_variants \
 --ref $ref \
 --infile ${prefix}.tfrecord.gz  \
 --nonvariant_site_tfrecord_path ${prefix}@${NSHARDS}.gvcf.tfrecord.gz \

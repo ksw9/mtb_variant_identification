@@ -7,12 +7,14 @@ bam=$2
 ploidy=$3 
 VARS_DIR=$4
 
-module load anaconda; source activate gatk_4.0.0.0_kwalter
+# Set up environment.
+source config.txt
 
-# Move to vars_dir if variable is set.
+# Move to vars_dir if variable is set, otherwise set VARS_DIR to current working directory. 
 echo $VARS_DIR
 if [ -z "$VARS_DIR" ]; then
   echo 'no output directory specified'
+  VARS_DIR=$(pwd)
   else 
   echo $VARS_DIR specified
   cd $VARS_DIR
@@ -43,7 +45,7 @@ gvcf=${prefix}"_gatk.g.vcf"
 vcf=${prefix}"_gatk.vcf.gz"
 	  
 # call variants with GATK 4.0 to GVCF. 
-gatk  --java-options "-Xmx50g" HaplotypeCaller \
+${GATK_4.0} --java-options "-Xmx50g" HaplotypeCaller \
 -R ${ref} \
 -ploidy ${ploidy} \
 -I ${bam} \
@@ -52,7 +54,7 @@ gatk  --java-options "-Xmx50g" HaplotypeCaller \
 
 # GVCF to VCF. 
 # Use latest GATK version: 4.1.0.0 (allows outputing non-variant sites). 
-/ifs/labs/andrews/walter/bin/gatk-4.1.0.0/gatk  --java-options '-Xmx50g' GenotypeGVCFs \
+${GATK_4.1} --java-options '-Xmx50g' GenotypeGVCFs \
 -R ${ref} \
 --variant ${gvcf} \
 -ploidy ${ploidy} \

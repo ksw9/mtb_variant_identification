@@ -7,8 +7,10 @@
 # read from command line.
 vcf=$1
 
-BCFTOOLS=/ifs/labs/andrews/walter/repos/bcftools/bcftools
+# Set up environment.
+source config.txt
 
+# set VCF prefix.
 prefix=$(basename ${vcf/.*})
 
 # Print to output.

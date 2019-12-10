@@ -1,25 +1,20 @@
 #!/bin/bash
 # Variant calling with Samtools. Requires: (1) reference genome, (2) bam file, (3) ploidy, (4) optionally, output directory.
 
-# Source environment with all necessary software.
-module load anaconda; source activate gatk_4.0.0.0_kwalter
-module load samtools/1.9
-module load htslib/1.9
-BCFTOOLS=/ifs/labs/andrews/walter/repos/bcftools/bcftools
-
-# Read from command line: ref genome, fastq 1, fastq 2.
+# Read input arguments
 ref=$1 
 bam=$2 
 ploidy=$3
 VARS_DIR=$4 
 
-# Local variables
-TMP_DIR=/local/scratch/kwalter/${mapper}/
+# Set up environment.
+source config.txt
 
-# Move to vars_dir if variable is set.
+# Move to vars_dir if variable is set, otherwise set VARS_DIR to current working directory. 
 echo $VARS_DIR
 if [ -z "$VARS_DIR" ]; then
   echo 'no output directory specified'
+  VARS_DIR=$(pwd)
   else 
   echo $VARS_DIR specified
   cd $VARS_DIR

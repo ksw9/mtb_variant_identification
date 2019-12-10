@@ -1,49 +1,44 @@
 #!/bin/bash
-# Run Illumina hap.py to calculate performance metrics. Requires (1) reference fasta, (2) query VCF, (3) truth VCF, and optionally: (4) filter, (5) genomic region, (6) ROC field.
 
-# Source environment with all necessary software.
-module load anaconda; source activate gatk_4.0.0.0_kwalter
-module purge
-module load anaconda
-source activate hap.py_0.3.10
-REF_DIR=/ifs/labs/andrews/walter/varcal/data/refs/
+# Run Illumina hap.py to calculate performance metrics. Requires (1) reference fasta, (2) query VCF, (3) truth VCF, 
+# (4) genomic region and (5) output file to store summary of *unfiltered* SNP-based results.
+# Do filtering before running hap.py.
 
 # Read from command line
 ref=$1
 query=$2 # first input is query vcf (not g.vcf)
 truth=$3
 region=${4:-genome} # default is entire genome
-out_file=${5:-QUAL} # output prefix
+out_file=${5} 
 
-echo $query      
-echo $region
-echo $ref
+# Set up environment.
+source config.txt
 
 # set file names
-output=$(basename $query)
-output=${output/.vcf*}_${region}
-echo $output
+prefix=$(basename $query)
+prefix=${prefix/.vcf*}_${region}
+echo $prefix
 
 # run hap.py
 if [ "$region" == "genome" ]
   then
     echo "No filter applied, whole genome"
 	# run hap.py
-	hap.py -r ${ref} $truth $query -o ${output} --set-gt hom
+	${HAPPY} -r ${ref} $truth $query -o ${prefix} --set-gt hom
 	
 # PPE genes
 elif [ "$region" == "ppe" ]
   then
     echo "No filter applied, ppe"
-		hap.py -r ${ref} $truth $query -o ${output} --set-gt hom -T ${REF_DIR}'ppe_genes_rename.bed.gz' 
+		${HAPPY -r ${ref} $truth $query -o ${prefix} --set-gt hom -T ${REF_DIR}'ppe_genes_rename.bed.gz' 
 
 # Non-PPE genes
 elif [ "$region" == "noppe" ]
   then
     echo "No filter applied, ppe"
-		hap.py -r ${ref} $truth $query -o ${output} --set-gt hom -T ${REF_DIR}ppe_complement.bed.gz 
+		${HAPPY -r ${ref} $truth $query -o ${prefix} --set-gt hom -T ${REF_DIR}ppe_complement.bed.gz 
 fi
 
-# collect summary information, print file name along with output
+# collect summary information, print file name along with prefix
 echo 'printing out filtered variants'
-echo $(basename $query) $(basename $ref) ${region} $(grep SNP,ALL ${output}'.summary.csv') >> ${out_file}
+echo $(basename $query) $(basename $ref) ${region} $(grep SNP,ALL ${prefix}'.summary.csv') >> ${out_file}
