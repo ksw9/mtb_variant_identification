@@ -1,10 +1,10 @@
 # Genomic variant identification methods alter *Mycobacterium tuberculosis* transmission inference
 
-Here we include scripts to create the plots in our paper: https://www.biorxiv.org/content/10.1101/733642v1?rss=1. 
+Here we include scripts used in our investigation of variant calling approaches: https://www.biorxiv.org/content/10.1101/733642v1?rss=1. 
 
 - Pathogen genomic data are increasingly used to characterize global and local transmission patterns of important human pathogens and to inform public health interventions. Yet there is no current consensus on how to measure genomic variation. We investigated the effects of variant identification approaches on transmission inferences for M. tuberculosis by comparing variants identified by five different groups in the same sequence data from a clonal outbreak. We then measured the performance of commonly used variant calling approaches in recovering variation in a simulated tuberculosis outbreak and tested the effect of applying increasingly stringent filters on transmission inferences and phylogenies. 
 
-test
+
 ## Scripts included. 
 
 - map_reads.sh 
@@ -15,6 +15,10 @@ test
   - Calls variants with Samtools. 
 - call_variants_deepvariant.sh 
   - Calls variants with DeepVariant. 
+-call_variants_pilon.sh 
+  - Calls variants with Pilon.
+-call_variants_breseq.sh 
+  - Calls variants with Breseq.
 - filter_variants.sh 
   - Filters VCF files. 
 - haplidify.py
@@ -29,11 +33,13 @@ test
   - This script compares variants identified by 5 different groups within the same sequence data from a clonal M. tuberculosis outbreak. 
   - Sequence data from Roetzer et al. 2013 Plos Med, (ENA Study Accession: PRJEB6945).
 
+*Set local paths to programs and directories in config.txt*
+
 ## Data 
 - A zipped archive including the submitted and formatted vcfs and fasta files from 5 different groups for the same sequence data from a clonal *M. tuberculosis* outbreak, that can be analyzed with plot_roetzer_variants.R.
 - Includes vcfs, fastas, bootstrap replicate trees fit by raxml-ng, and accompanying sample metadata from the original study, Roetzer et al. 2013 Plos Med. 
 
-## Required tools. 
+## Required tools are listed in the Supplement of our paper. 
 
 - Bowtie2	http://bowtie-bio.sourceforge.net/bowtie2/index.shtml
 
@@ -48,6 +54,10 @@ test
 - GATK	https://software.broadinstitute.org/gatk/
 
 - DeepVariant	https://github.com/google/deepvariant
+
+- Pilon https://github.com/broadinstitute/pilon
+
+- Breseq https://github.com/barricklab/breseq/releases/tag/v0.34.1
 
 - hap.py	https://github.com/Illumina/hap.py
 
