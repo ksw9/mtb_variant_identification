@@ -2,7 +2,7 @@
 
 Here we include scripts used in our investigation of variant calling approaches: https://www.biorxiv.org/content/10.1101/733642v1?rss=1. 
 
-- Pathogen genomic data are increasingly used to characterize global and local transmission patterns of important human pathogens and to inform public health interventions. Yet there is no current consensus on how to measure genomic variation. We investigated the effects of variant identification approaches on transmission inferences for M. tuberculosis by comparing variants identified by five different groups in the same sequence data from a clonal outbreak. We then measured the performance of commonly used variant calling approaches in recovering variation in a simulated tuberculosis outbreak and tested the effect of applying increasingly stringent filters on transmission inferences and phylogenies. 
+Pathogen genomic data are increasingly used to characterize global and local transmission patterns of important human pathogens and to inform public health interventions. Yet there is no current consensus on how to measure genomic variation. We investigated the effects of variant identification approaches on transmission inferences for M. tuberculosis by comparing variants identified by five different groups in the same sequence data from a clonal outbreak. We then measured the performance of commonly used variant calling approaches in recovering variation in a simulated tuberculosis outbreak and tested the effect of applying increasingly stringent filters on transmission inferences and phylogenies. 
 
 
 ## Scripts included. 
@@ -35,7 +35,7 @@ Here we include scripts used in our investigation of variant calling approaches:
 ## Data 
 - Simulated data is available in a repository here: https://sdr.stanford.edu/items/druid:mr554nj9219. 
 
-## Required tools are listed in the Supplement of our paper. 
+## Required tools are listed in the paper supplement.
 
 - Bowtie2	http://bowtie-bio.sourceforge.net/bowtie2/index.shtml
 
