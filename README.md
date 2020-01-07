@@ -15,11 +15,11 @@ Here we include scripts used in our investigation of variant calling approaches:
   - Calls variants with Samtools. 
 - call_variants_deepvariant.sh 
   - Calls variants with DeepVariant. 
--call_variants_pilon.sh 
+- call_variants_pilon.sh 
   - Calls variants with Pilon.
--call_variants_breseq.sh 
+- call_variants_breseq.sh 
   - Calls variants with Breseq.
-- filter_variants.sh 
+- filter_vf.sh 
   - Filters VCF files. 
 - haplidify.py
   - Converts diploid single-sample VCF file to haplid VCF file using allele depth information.  
@@ -29,15 +29,11 @@ Here we include scripts used in our investigation of variant calling approaches:
   - Tests performance of a pipeline in recovering true variants.
 - vqsr.sh
   - Apply GATK's VQSR, using an internal training set of high-quality variants (defined here as variants with QUAL > the mean).
-- plot_roetzer_variants.R 
-  - This script compares variants identified by 5 different groups within the same sequence data from a clonal M. tuberculosis outbreak. 
-  - Sequence data from Roetzer et al. 2013 Plos Med, (ENA Study Accession: PRJEB6945).
-
-*Set local paths to programs and directories in config.txt*
+- config.txt. 
+  - Set local paths to programs and directories to be sourced in config.txt.
 
 ## Data 
-- A zipped archive including the submitted and formatted vcfs and fasta files from 5 different groups for the same sequence data from a clonal *M. tuberculosis* outbreak, that can be analyzed with plot_roetzer_variants.R.
-- Includes vcfs, fastas, bootstrap replicate trees fit by raxml-ng, and accompanying sample metadata from the original study, Roetzer et al. 2013 Plos Med. 
+- Simulated data is available in a repository here: https://sdr.stanford.edu/items/druid:mr554nj9219. 
 
 ## Required tools are listed in the Supplement of our paper. 
 
