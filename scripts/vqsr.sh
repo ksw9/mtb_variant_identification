@@ -30,7 +30,7 @@ tabix -f -p vcf ${base}_training_sites.vcf.gz
 
 # Recalibrate variants. 
 
-${GATK_4.1} VariantRecalibrator \
+if ${GATK_41} VariantRecalibrator \
 -R ${ref} \
 --variant ${vcf} \
 --resource:truePos,known=false,training=true,truth=true,prior=15 ${base}_training_sites.vcf.gz \
@@ -51,7 +51,7 @@ ${GATK_4.1} VariantRecalibrator \
 
 elif
 # If failed, remove MQRankSum which may not have sufficient variation.
-${GATK_4.1} VariantRecalibrator \
+${GATK_41} VariantRecalibrator \
 -R ${ref} \
 --variant ${vcf} \
 --resource:truePos,known=false,training=true,truth=true,prior=15 ${base}_training_sites.vcf.gz \
@@ -71,7 +71,7 @@ ${GATK_4.1} VariantRecalibrator \
 
 elif
 # If failed, remove ReadPosRankSum which may not have sufficient variation.
-${GATK_4.1} VariantRecalibrator \
+${GATK_41} VariantRecalibrator \
 -R ${ref} \
 --variant ${vcf} \
 --resource:truePos,known=false,training=true,truth=true,prior=15 ${base}_training_sites.vcf.gz \
@@ -92,7 +92,7 @@ then
 else 
 
 # If failed, remove both MQRankSum and ReadPosRankSum, which may not have sufficient variation.
-${GATK_4.1} VariantRecalibrator \
+${GATK_41} VariantRecalibrator \
 -R ${ref} \
 --variant ${vcf} \
 --resource:truePos,known=false,training=true,truth=true,prior=15 ${base}_training_sites.vcf.gz \
@@ -105,7 +105,7 @@ ${GATK_4.1} VariantRecalibrator \
 --max-gaussians 2 \
 --output ${base}.recal \
 --tranches-file ${base}".tranches"  \
--tranche 100.0 -tranche 99.0 -tranche 96.0 -tranche 93.0 -tranche 90.0  
+-tranche 100.0 -tranche 99.0 -tranche 99.9 -tranche 99.5 
 
 echo 'VQSR w/o ReadPosRankSum or MQRankSum'
 
@@ -115,7 +115,7 @@ fi
 ts_filter=99.0
 
 # Apply VQSR.
-${GATK_4.1} ApplyVQSR \
+${GATK_41} ApplyVQSR \
 -R ${ref} \
 -mode SNP \
 --variant ${vcf}  \
@@ -136,7 +136,7 @@ failedSites=$(bcftools query  -f '%INFO/VQSLOD\n' ${base}_vqsr.vcf | grep '\inf$
 if [ "$failedSites" -ne 0 ]; then
     echo 'rerunning with maxGaussians set to 1'
   
-	${GATK_4.1}  --java-options  "-Xmx20g"  VariantRecalibrator \
+	${GATK_41}  --java-options  "-Xmx20g"  VariantRecalibrator \
 	-R ${ref} \
 	--variant ${vcf} \
 	--resource:truePos,known=false,training=true,truth=true,prior=15 ${base}_training_sites.vcf.gz \
@@ -151,13 +151,13 @@ if [ "$failedSites" -ne 0 ]; then
 	--max-gaussians 1 \
 	--output ${base}.recal \
 	--tranches-file ${base}".tranches"  \
-	-tranche 100.0 -tranche 99.0 -tranche 96.0 -tranche 93.0 -tranche 90.0 
+	-tranche 100.0 -tranche 99.0 -tranche 99.9 -tranche 96.0 -tranche 93.0 -tranche 90.0 
 
 	# define tranch filter level
 	ts_filter=99.0
 
 	# recalibration to SNPs 
-	${GATK_PATH} --java-options "-Xmx20g" ApplyVQSR \
+	${GATK_41} --java-options "-Xmx20g" ApplyVQSR \
 	-R ${ref} \
 	-mode SNP \
 	--variant ${vcf}  \
@@ -181,4 +181,4 @@ rm ${base}.recal.idx
 rm ${base}_training_sites.vcf.gz
 rm ${base}_training_sites.vcf.gz.tbi
 rm ${base}".tranches"
-rm ${base}_vqsr.vcf
+#rm ${base}_vqsr.vcf

@@ -6,25 +6,23 @@ ref=${1} # 1st input is full path to reference genome
 mapper=$2 # 2nd input is mapping algorithm 
 p1=$3  # 3th input is full path to read 1
 p2=$4  # 4th input is full path to read 2 (if paired-end)
-prefix=$5
+BAMS_DIR=$5
 
 # Set up environment.
 source config.txt
 
 # Move to vars_dir if variable is set, otherwise set VARS_DIR to current working directory. 
-echo $VARS_DIR
-if [ -z "$VARS_DIR" ]; then
+echo $BAMS_DIR
+if [ -z "$BAMS_DIR" ]; then
   echo 'no output directory specified'
-  VARS_DIR=$(pwd)
+  BAMS_DIR=$(pwd)
   else 
-  echo $VARS_DIR specified
-  cd $VARS_DIR
+  echo $BAMS_DIR specified
+  cd $BAMS_DIR
 fi
 
-# Define prefix if is not defined by input. 
-if [ -z ${5} ]; then 
-  prefix=$(basename ${p1%%.*})
-fi
+# Define prefix.
+prefix=$(basename ${p1%%.*})
 
 # Create temp directory specific for files (so no overwriting of other temp files).
 TMP_DIR=${TMP_DIR}${prefix}_${mapper}/
@@ -80,14 +78,14 @@ if [ $mapper == 'bowtie' ] || [ $mapper == 'bowtie2' ] ; then
   # if no indexing, index reference genome
   if [ ! -f ${ref%.*}".1.bt2" ] ; then
   echo "bowtie2 indexing $ref" >&2
-  ${BOWTIE2}bowtie2-build ${ref} ${ref_index}
+  ${BOWTIE2_BUILD} ${ref} ${ref_index}
   fi 
 
   # map
   #if paired-end reads
   echo "mapping with bowtie2" >&2
   if [ ! -z ${p2} ]; then 
-  ${BOWTIE2}bowtie2 --threads 4 -X 1100 -x ${ref_index} -1 ${p1} -2 ${p2} -S ${sam}
+  ${BOWTIE2} --threads 4 -X 1100 -x ${ref_index} -1 ${p1} -2 ${p2} -S ${sam}
   # -x basename of reference index 
   # --un-gz gzips sam output
   # p is number of threads
@@ -98,7 +96,7 @@ if [ $mapper == 'bowtie' ] || [ $mapper == 'bowtie2' ] ; then
   # if single-end reads
   elif [ -z ${p2} ]; then
     echo "single reads"
-  ${BOWTIE2}bowtie2 --time --threads 4 -X 1100 -x ${ref_index} -U ${p1} -S ${sam}
+  ${BOWTIE2} --time --threads 4 -X 1100 -x ${ref_index} -U ${p1} -S ${sam}
   # -U for unpaired reads
   fi
   # Error handling

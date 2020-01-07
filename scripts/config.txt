@@ -1,0 +1,28 @@
+# Paths
+TMP_DIR=
+SCRIPTS_DIR=
+REF_DIR=
+
+module load anaconda
+module load samtools/1.9
+module load htslib/1.9
+module load gatk
+module load gatk4/4.1.0.0 
+
+# Paths to programs - update this with local paths too installed programs. 
+
+BOWTIE2=/scg/apps/software/anaconda/3_5.0.1_20180125/envs/gatk_4.0.0.0_kwalter/bin/bowtie2
+BOWTIE2_BUILD=
+BWA=
+SMALT=
+SAMBAMBA=
+PICARD=
+BCFTOOLS=
+GATK_40=
+GATK_41=
+BCFTOOLS=
+BRESEQ=
+PILON=
+DEEPVAR_MODEL=
+DEEPVAR=
+HAPPY=

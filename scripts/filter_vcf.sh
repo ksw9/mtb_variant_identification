@@ -54,7 +54,7 @@ fi
 if [[ "$vcf" == *deep.g.vcf.gz ]]; then 
   
   #First haploidify DeepV calls within the gVCF.
-  ${SCRIPTS_DIR}haploidify.py ${vcf} ${hap_vcf}
+  ~/.conda/envs/my_gatk_4.0.0.0_kwalter/bin/python ${SCRIPTS_DIR}haploidify.py ${vcf} ${hap_vcf}
   
   #Zip and index haploid VCF. 
   bgzip -f ${hap_vcf} > ${hap_vcf}.gz
@@ -107,7 +107,7 @@ if [[ "$vcf" == *samtools.vcf.gz ]]; then
   ${BCFTOOLS} index ${bam}
   
   # Annotate variants.
-  ${GATK_4.0} VariantAnnotator \
+  ${GATK_40} VariantAnnotator \
   -V ${vcf} \
   -O ${ann_vcf} \
   -I ${bam} \

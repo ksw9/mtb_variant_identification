@@ -45,7 +45,7 @@ gvcf=${prefix}"_gatk.g.vcf"
 vcf=${prefix}"_gatk.vcf.gz"
 	  
 # call variants with GATK 4.0 to GVCF. 
-${GATK_4.0} --java-options "-Xmx50g" HaplotypeCaller \
+${GATK_41} --java-options "-Xmx50g" HaplotypeCaller \
 -R ${ref} \
 -ploidy ${ploidy} \
 -I ${bam} \
@@ -54,7 +54,7 @@ ${GATK_4.0} --java-options "-Xmx50g" HaplotypeCaller \
 
 # GVCF to VCF. 
 # Use latest GATK version: 4.1.0.0 (allows outputing non-variant sites). 
-${GATK_4.1} --java-options '-Xmx50g' GenotypeGVCFs \
+${GATK_41} --java-options '-Xmx50g' GenotypeGVCFs \
 -R ${ref} \
 --variant ${gvcf} \
 -ploidy ${ploidy} \
@@ -63,8 +63,8 @@ ${GATK_4.1} --java-options '-Xmx50g' GenotypeGVCFs \
 # min base quality score is 10 by default.
 
 # Remove tmp files.
-rm ${gvcf} 
-rm ${gvcf}.idx
+#rm ${gvcf} 
+#rm ${gvcf}.idx
 
 #Error handling
 if [ "$?" != "0" ]; then

@@ -11,8 +11,9 @@ truth=$3
 region=${4:-genome} # default is entire genome
 out_file=${5} 
 
-# Set up environment.
-source config.txt
+# Set up environment. Needs to use Python 2.
+module load anaconda
+source activate hap.py_0.3.10
 
 # set file names
 prefix=$(basename $query)
@@ -24,19 +25,19 @@ if [ "$region" == "genome" ]
   then
     echo "No filter applied, whole genome"
 	# run hap.py
-	${HAPPY} -r ${ref} $truth $query -o ${prefix} --set-gt hom
+	hap.py -r ${ref} $truth $query -o ${prefix} --set-gt hom
 	
 # PPE genes
 elif [ "$region" == "ppe" ]
   then
     echo "No filter applied, ppe"
-		${HAPPY -r ${ref} $truth $query -o ${prefix} --set-gt hom -T ${REF_DIR}'ppe_genes_rename.bed.gz' 
+	hap.py -r ${ref} $truth $query -o ${prefix} --set-gt hom -T 'ppe_genes_rename.bed.gz' 
 
 # Non-PPE genes
 elif [ "$region" == "noppe" ]
   then
     echo "No filter applied, ppe"
-		${HAPPY -r ${ref} $truth $query -o ${prefix} --set-gt hom -T ${REF_DIR}ppe_complement.bed.gz 
+	hap.py -r ${ref} $truth $query -o ${prefix} --set-gt hom -T ppe_complement.bed.gz 
 fi
 
 # collect summary information, print file name along with prefix

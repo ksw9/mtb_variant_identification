@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/home/kwalter/.conda/envs/my_gatk_4.0.0.0_kwalter/bin/python
 
 """haploidify.py 
    Reads in full path to input diploid single-sample VCF file and writes a haploid VCF in same location.
